@@ -1,42 +1,61 @@
-import tkinter as tk
+from openpyxl import Workbook
 
 
-class Log:  #todo
-
+class ExcelFile:
     def __init__(self):
-        self.window = tk.Tk()
-        self.log_colour = "green"
-        tk.Label(self.window, text="Entry Actions").pack()
-        self.add_btn = tk.Button(self.window, text = "Add Entry", fg = self.log_colour, command = self.add)
-        self.view_btn = tk.Button(self.window, text = "View entries", fg = self.log_colour)
-        self.close_btn = tk.Button(self.window, text = "Close", fg = self.log_colour, command = self.window.quit)
-        self.add_btn.pack()
-        self.view_btn.pack()
-        self.close_btn.pack()
+        self.title = ""
+        self.wb = None
+        self.ws = None
 
-    def add(self):  #todo
-        # GUI
-        add_window = tk.Tk()
-        add_window.title("Adding an entry")
-        tk.Label(add_window, text = "Entry number").grid(row = 0)
-        tk.Entry(add_window).grid(row = 0, column = 1)
-        tk.Label(add_window, text = "Date (DD-MM-YYYY)").grid(row = 1, column = 0)
-        tk.Entry(add_window).grid(row = 1, column = 1)
-        tk.Label(add_window, text = "Location").grid(row = 2)
-        tk.Entry(add_window).grid(row = 2, column = 1)
-        tk.Label(add_window, text = "Amount spent").grid(row = 3)
-        tk.Entry(add_window).grid(row = 3, column = 1)
+    def new_wb(self):
+        # create a new worksheet
+        self.wb = Workbook()
+        self.ws = self.wb.active
 
-    def view(self):  #todo
-        # opens the excel file and display entries
+    def wb_title(self, title):
+        # sets the month to log as title of workbook
+        self.title = title
+
+    def open_wb(self):  #todo
+        # open an existing workbook
         pass
 
-    def edit(self):  #todo
-        # selects an entry and edits the data
-        pass
+    def initialise_ws(self):
+        # setting up workbook headers
+        date_c_header = self.ws['A1']
+        location_c_header = self.ws['B1']
+        amount_c_header = self.ws['C1']
 
-    def save(self):  #todo
-        # saves the data
-        pass
+        date_c_header.value = "DATE"
+        location_c_header.value = "LOCATION"
+        amount_c_header.value = "AMOUNT"
 
+    def add_log(self, date, location, amount):
+        for row in self.ws.iter_rows(min_row=2, max_col=3, max_row=5):  # iterate over rows 2-100
+            for cell in row:  # for each cell in the row
+                if cell.value is None:  # if the cell is empty
+                    if cell.column == 1:
+                        cell.value = date
+                    elif cell.column == 2:
+                        cell.value = location
+                    elif cell.column == 3:
+                        cell.value = float(amount)
+                else:  # iterate to the next row
+                    continue
+            break
+
+    def save_wb(self):
+        file_name = self.title + ".xlsx"
+        self.wb.save(file_name)
+
+def testing():
+    xl = ExcelFile()
+    xl.new_wb()
+    xl.wb_title("testfile")
+    xl.initialise_ws()
+    xl.add_log('01/02/2019','No Frills','30')
+    xl.add_log('02/02/2019', "Dollarama", "10")
+    xl.save_wb()
+    
+testing()
 
