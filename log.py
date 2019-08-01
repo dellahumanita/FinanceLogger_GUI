@@ -31,18 +31,13 @@ class ExcelFile:
         amount_c_header.value = "AMOUNT"
 
     def add_log(self, date, location, amount):
-        for row in self.ws.iter_rows(min_row=2, max_col=3, max_row=5):  # iterate over rows 2-100
-            for cell in row:  # for each cell in the row
-                if cell.value is None:  # if the cell is empty
-                    if cell.column == 1:
-                        cell.value = date
-                    elif cell.column == 2:
-                        cell.value = location
-                    elif cell.column == 3:
-                        cell.value = float(amount)
-                else:  # iterate to the next row
-                    continue
-            break
+        # adds log to the following row
+
+        last_row = self.find_last_row_used()
+        next_row = last_row+1
+        self.ws.cell(column=1, row=next_row, value=date)
+        self.ws.cell(column=2, row=next_row, value=location)
+        self.ws.cell(column=3, row=next_row, value=amount)
 
     def save_wb(self):
         file_name = self.title + ".xlsx"
