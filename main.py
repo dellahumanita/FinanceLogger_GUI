@@ -28,7 +28,7 @@ def new_workbook():
     Label(new_wb_screen, text="Enter the month whose entries you want to log.").pack()
     Label(new_wb_screen, text=" ").pack()
 
-    xl_new_wb()  # create new xl workbook
+    xl_new_workbook()  # create new xl workbook
 
 
 # Retrieving new workbook title
@@ -45,7 +45,7 @@ def new_workbook_title():
 # Helper function to new_workbook_title
 def title_and_add():
     get_month_title()
-    xl_new.wb_title(month_info)  # set workbook title
+    xl_new.workbook_title(month_info)  # set workbook title
 
     add_log()  # add log to xl file
 
@@ -56,10 +56,10 @@ def get_month_title():
 
 
 # Adding a log to the tracker
-def add_log():
+def add_log(screen):
     global add_log_screen
 
-    add_log_screen = Toplevel(new_wb_screen)  # sub-menu to New Workbook screen
+    add_log_screen = Toplevel(screen)  # sub-menu to New Workbook screen
     add_log_screen.title("Adding a log")
     log_colour = "green"
 
@@ -118,19 +118,19 @@ def add_to_xl():
 
 
 def close_add_log_screen():
-    xl_new.save_wb()  # saves data in Excel
+    xl_new.save_workbook()  # saves data in Excel
     add_log_screen.destroy()  # closes Date, Location, Amount window
     new_wb_screen.destroy()  # closes Enter Month window
 
 
 # Create new workbook in Excel
-def xl_new_wb():
+def xl_new_workbook():
     global xl_new
 
     xl_new = ExcelFile()
-    xl_new.new_wb()  # create empty worksheet
+    xl_new.new_workbook()  # create empty worksheet
     new_workbook_title()  # retrieve workbook title
-    xl_new.initialise_ws()  # set the headers in the worksheet
+    xl_new.initialise_worksheet()  # set the headers in the worksheet
 
 
 # Opening an existing workbook
@@ -149,10 +149,10 @@ def open_existing_workbook():
     file_entry.pack()
     Label(open_wb_screen, text = " ").pack()
 
-    Button(open_wb_screen, text = "OK", command = existing_wb).pack()
+    Button(open_wb_screen, text = "OK", command = existing_workbook).pack()
 
 
-def close_open_wb_screen():
+def close_open_workbook_screen():
     open_wb_screen.destroy()
 
 
@@ -160,12 +160,29 @@ def get_filename():
     global file_info
     file_info = file_name.get()
 
-
-def existing_wb():
+# Opens existing workbook
+def existing_workbook():
     xl_load = ExcelFile()  # instantiate load ExcelFile object
     get_filename()
-    wb_name = file_info + "xlsx"
-    xl_load.open_wb(wb_name)  # load workbook
+    wb_name = str(file_info) + ".xlsx"
+    print(wb_name)
+    xl_load.open_workbook(wb_name)  # load workbook
+
+    workbook_actions()
+
+# Window to determine user action
+def workbook_actions():
+    action_screen = Toplevel(open_wb_screen)
+    action_screen.title("Actions")
+    Label(action_screen, text = "What would you like to do with this workbook?").pack()
+    Button(action_screen, text = "Add log", command = lambda : add_log(open_wb_screen)).pack()
+    Label(action_screen, text = " ").pack()
+    Button(action_screen, text = "View workbook", command = view_wb).pack()
+    Label(action_screen, text = " ").pack()
+
+# Opens existing workbook in Excel
+def view_wb():  #todo
+    pass
 
 
 if __name__ == "__main__":
