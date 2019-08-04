@@ -22,6 +22,9 @@ def main_window():
 # Creating a new workbook
 def new_workbook():
     global new_wb_screen
+    global new_flag
+
+    new_flag = True
 
     new_wb_screen = Toplevel(main_screen)  # a sub-menu of main_screen
     new_wb_screen.title("New Workbook")
@@ -34,6 +37,7 @@ def new_workbook():
 # Retrieving new workbook title
 def new_workbook_title():
     global month_title
+
     month_title = StringVar()
     get_month_title()
     month_entry = Entry(new_wb_screen, textvariable = month_title)
@@ -105,11 +109,15 @@ def get_amount():
 
 # activates when adding to log
 def add_to_xl():
+    global new_flag
     get_date()
     get_amount()
     get_location()
 
-    xl_new.add_log(date_info, location_info, amount_info)
+    if new_flag is True:
+        xl_new.add_log(date_info, location_info, amount_info)
+    else:
+        xl_load.add_log(date_info, location_info, amount_info)
 
     Label(add_log_screen, text = "Added data successfully").grid(row=6)
     Button(add_log_screen, text = "Done", command = close_add_log_screen).grid(row=6, column=1)
@@ -118,9 +126,17 @@ def add_to_xl():
 
 
 def close_add_log_screen():
-    xl_new.save_workbook()  # saves data in Excel
+    if new_flag is True:
+        xl_new.save_new_workbook()  # saves data in Excel
+    else:
+        xl_load.save_opened_workbook()
+
     add_log_screen.destroy()  # closes Date, Location, Amount window
-    new_wb_screen.destroy()  # closes Enter Month window
+
+    if new_flag is True:
+        new_wb_screen.destroy()  # closes Enter Month window
+    else:
+        open_wb_screen.destroy()
 
 
 # Create new workbook in Excel
@@ -136,6 +152,9 @@ def xl_new_workbook():
 # Opening an existing workbook
 def open_existing_workbook():
     global open_wb_screen
+    global new_flag
+
+    new_flag = False
 
     open_wb_screen = Toplevel(main_screen)  # a sub-menu of main menu
     open_wb_screen.title("Open a Workbook")
@@ -160,15 +179,19 @@ def get_filename():
     global file_info
     file_info = file_name.get()
 
+
 # Opens existing workbook
 def existing_workbook():
+    global xl_load
+
     xl_load = ExcelFile()  # instantiate load ExcelFile object
     get_filename()
     wb_name = str(file_info) + ".xlsx"
-    print(wb_name)
     xl_load.open_workbook(wb_name)  # load workbook
+    xl_load.workbook_title(str(file_info))
 
-    workbook_actions()
+    workbook_actions()  # option to Add Log or View Workbook data
+
 
 # Window to determine user action
 def workbook_actions():
@@ -177,15 +200,17 @@ def workbook_actions():
     Label(action_screen, text = "What would you like to do with this workbook?").pack()
     Button(action_screen, text = "Add log", command = lambda : add_log(open_wb_screen)).pack()
     Label(action_screen, text = " ").pack()
-    Button(action_screen, text = "View workbook", command = view_wb).pack()
+    Button(action_screen, text = "View workbook", command = view_workbook).pack()
     Label(action_screen, text = " ").pack()
 
+
 # Opens existing workbook in Excel
-def view_wb():  #todo
-    pass
+def view_workbook():  #todo
+    xl_load.view()  # displays workbook data
 
 
 if __name__ == "__main__":
+    new_flag = False
     main_window()
 
 
