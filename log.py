@@ -1,42 +1,91 @@
-import tkinter as tk
+from openpyxl import Workbook
+from openpyxl import load_workbook
+
+# NOTE:
+# - function name uses full form, i.e. "workbook", "worksheet", etc.
+# - variables and class attributes uses shorted form, i.e. "wb", "ws", etc.
 
 
-class Log:  #todo
-
+class ExcelFile:
     def __init__(self):
-        self.window = tk.Tk()
-        self.log_colour = "green"
-        tk.Label(self.window, text="Entry Actions").pack()
-        self.add_btn = tk.Button(self.window, text = "Add Entry", fg = self.log_colour, command = self.add)
-        self.view_btn = tk.Button(self.window, text = "View entries", fg = self.log_colour)
-        self.close_btn = tk.Button(self.window, text = "Close", fg = self.log_colour, command = self.window.quit)
-        self.add_btn.pack()
-        self.view_btn.pack()
-        self.close_btn.pack()
+        self.title = ""
+        self.new_wb = None  # new workbook
+        self.ws = None  # new worksheet
+        self.load_wb = None  # existing workbook
 
-    def add(self):  #todo
-        # GUI
-        add_window = tk.Tk()
-        add_window.title("Adding an entry")
-        tk.Label(add_window, text = "Entry number").grid(row = 0)
-        tk.Entry(add_window).grid(row = 0, column = 1)
-        tk.Label(add_window, text = "Date (DD-MM-YYYY)").grid(row = 1, column = 0)
-        tk.Entry(add_window).grid(row = 1, column = 1)
-        tk.Label(add_window, text = "Location").grid(row = 2)
-        tk.Entry(add_window).grid(row = 2, column = 1)
-        tk.Label(add_window, text = "Amount spent").grid(row = 3)
-        tk.Entry(add_window).grid(row = 3, column = 1)
+    def new_workbook(self):
+        # create a new worksheet
+        self.new_wb = Workbook()
+        self.ws = self.new_wb.active
+        print("new wb created")
+
+    def workbook_title(self, title):
+        # sets the month to log as title of workbook
+        self.title = title
+
+    def open_workbook(self, filename):
+        # open an existing workbook
+        self.load_wb = load_workbook(filename)
+        print("Opening workbook...")
+
+    def initialise_worksheet(self):
+        # setting up workbook headers
+
+        date_c_header = self.ws['A1']
+        location_c_header = self.ws['B1']
+        amount_c_header = self.ws['C1']
+
+        date_c_header.value = "DATE"
+        location_c_header.value = "LOCATION"
+        amount_c_header.value = "AMOUNT"
+
+    def add_log(self, date, location, amount):
+        # adds log to the following row
+
+        last_row = self.find_last_row_used()
+        next_row = last_row+1
+        self.ws.cell(column=1, row=next_row, value=date)
+        self.ws.cell(column=2, row=next_row, value=location)
+        self.ws.cell(column=3, row=next_row, value=amount)
+
+    def find_last_row_used(self):
+        # searches for the last row entered
+        return self.ws.max_row
+
+    def save_workbook(self):
+        # saves workbook
+        file_name = self.title + ".xlsx"
+        self.new_wb.save(file_name)
 
     def view(self):  #todo
-        # opens the excel file and display entries
-        pass
+        # iterate over used cells in Excel file
+        # add to data structure -- ?
+        # convert to string
+        # print in separate window
 
-    def edit(self):  #todo
-        # selects an entry and edits the data
-        pass
+        self.ws = self.load_wb.get_sheet_by_name("Sheet")
+        print(self.ws)
+        file_data = {}
+        print("Reading rows...")
+        for row in range(2, self.ws.max_row + 1):
+            date = self.ws['A' + str(row)].value
+            location = self.ws['B' + str(row)].value
+            amount = self.ws['C' + str(row)].value
 
-    def save(self):  #todo
-        # saves the data
-        pass
+            file_data.setdefault(date, {location, amount})
+            print(file_data)
+
+# xl_new = ExcelFile()
+# xl_new.new_workbook()
+# xl_new.workbook_title("testfile")
+# xl_new.initialise_worksheet()
+# xl_new.add_log('01/02/2019','No Frills','30')
+# xl_new.add_log('02/03/2019','no','10')
+# xl_new.add_log('03/04/2019', 'Chapters', '100')
+#
+# xl_new.save_workbook()
 
 
+# xl = ExcelFile()
+# xl.open_workbook('May.xlsx')
+# xl.view()
